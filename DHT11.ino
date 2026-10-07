@@ -2,12 +2,17 @@
 #include "WiFi.h"
 #include "WebServer.h"
 #include "secret.h"
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
 
-#define DHTPIN 15
+
+
+#define DHTPIN 4
 #define DHTTYPE DHT11
-#define WIFI_SSID "your_ssid_here"
-#define PASSWORD "your_password_here"
 
+
+// Set the LCD address to 0x27 ( found after running a ___ test ) for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 const char* ssid = WIFI_SSID;
 const char* password = PASSWORD;
@@ -53,19 +58,18 @@ Serial.print("Wifi Connected to: ");
 Serial.println(WiFi.localIP());
 Serial.println();
 
-WiFi.begin();
-bool check = config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1 = (uint32_t)0x00000000, IPAddress dns2 = (uint32_t)0x00000000);
-if(check){
-  Serial.println("Hosting was sucessful.");
-}
-else{
-  Serial.println("Website failed loading.");
-}
+
 
 Serial.println("Testing DHT Board");
 Serial.println();
 dht.begin();
 
+Wire.begin(21,22);
+
+// initialize the LCD and printing to test the lcd
+	lcd.init();
+  lcd.backlight();
+ 
 }
 
 void loop() {
@@ -79,6 +83,16 @@ void loop() {
   else{
     Serial.print("Temp is ");
     Serial.print(getTempNum);
+    lcd.setCursor(0,0);
+    lcd.print("Temp: ");
+    lcd.print(getTempNum);
+    lcd.print("C   ");  // reason for spaces is so they overwrite any leftover digits
+
+    lcd.setCursor(0, 1);
+    lcd.print("Hum: ");
+    lcd.print(getHumidityNum);
+    lcd.print("%     ");
+
     Serial.print(" | Humidity is ");
     Serial.println(getHumidityNum);
   }
